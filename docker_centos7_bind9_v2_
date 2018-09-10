@@ -1,0 +1,26 @@
+# centos/bind
+FROM centos
+MAINTAINER "Ihor Hordiichuk" <multihandedshiva@gmail.com>
+
+# Install
+RUN set -x \
+	&& yum update \
+	&& yum install --no-install-recommends --no-install-suggests -y \
+		bind9 \
+		dnsutils \
+		iputils-ping \
+	&& yum purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $fetchDeps \
+	&& rm -r /var/lib/apt/lists/* \
+	&& mkdir /var/log/named \
+	&& chown bind:bind /var/log/named \
+	&& chmod 0755 /var/log/named
+
+# Scipts (Bootstrap)
+COPY ./data/docker-entrypoint.sh /
+
+# Ports
+EXPOSE 53
+EXPOSE 53/udp
+
+# Entrypoint
+ENTRYPOINT ["/docker-entrypoint.sh"]

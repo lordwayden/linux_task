@@ -1,0 +1,25 @@
+# ISC Bind9 container / IPv4 only
+
+FROM centos:centos7
+MAINTAINER Ihor Hordiichuk <hordijchuk@me.com>
+
+# install main packages:
+RUN yum -y install bind-utils bind && \
+    yum clean all
+
+ADD container-image-root /
+
+# set up the BIND env and gen rndc key
+RUN rndc-confgen -a -c /etc/rndc.key && \
+    chown named:named /etc/rndc.key && \
+    chmod 755 /entrypoint
+
+EXPOSE 53/udp 53/tcp
+
+# Volumes:
+#  * /named   - this is where all the named data lives
+VOLUME [ "/named" ]
+
+# start services:
+ENTRYPOINT [ "/entrypoint"]
+CMD [ "/usr/sbin/named" ]
